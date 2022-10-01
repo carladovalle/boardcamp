@@ -22,14 +22,18 @@ async function createCategories (req, res) {
     const { name } = req.body;
 
     try {
+
         const hasCategory = await connection.query('SELECT * FROM categories WHERE name = $1;', [name]);
         if (hasCategory) {
             return res.status(409).send("A categoria já existe.")
         }
+
         await connection.query(
             'INSERT INTO categories (name) VALUES ($1);', [name]
         );
+
         res.sendStatus(201);
+        
     } catch (error) {
         return res.send(error.message);
     }
