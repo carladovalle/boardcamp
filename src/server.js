@@ -7,18 +7,34 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/categories', async (req, res) => {
-    const categories = await connection.query('select * from categories');
+    const categories = await connection.query('SELECT * FROM categories;');
     res.send(categories.rows);
 });
 
-app.post('/categories', (req, res) => {
+app.post('/categories', async (req, res) => {
     const { name } = req.body;
 
-    connection.query(
+    await connection.query(
         'INSERT INTO categories (name) VALUES ($1);', [name]
     );
 
-    res.send('ok').status(201);
+    res.sendStatus(201);
+});
+
+app.get('/games', async (req, res) => {
+    const games = await connection.query('SELECT * FROM games;');
+    res.send(games.rows);
+}); 
+
+app.post('/games', async (req, res) => {
+    const { name, image, stockTotal, categoryId, pricePerDay } = req.body;
+
+    await connection.query(
+        'INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);', 
+            [name, image, stockTotal, categoryId, pricePerDay]
+    );
+
+    res.sendStatus(201);
 });
 
 app.listen(4000, () => {
