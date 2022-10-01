@@ -1,4 +1,5 @@
 import connection from "../Database/database.js";
+import { categoriesSchema } from "../Schemas/categoriesValidation.js";
 
 async function getCategories (req, res) {
     const categories = await connection.query('SELECT * FROM categories;');
@@ -6,13 +7,29 @@ async function getCategories (req, res) {
 };
 
 async function createCategories (req, res) {
+
+    const validation = categoriesSchema.validate(req.body, {
+        abortEarly: false,
+    });
+
+    if (validation.error) {
+        const errorList = validation.error.details
+          .map((err) => err.message)
+          .join('\n');
+        return res.status(400).send(errorList);
+    }
+
     const { name } = req.body;
 
-    await connection.query(
-        'INSERT INTO categories (name) VALUES ($1);', [name]
-    );
+    try {
+        await connection.query(
+            'INSERT INTO categories (name) VALUES ($1);', [name]
+        );
+        res.sendStatus(201);
+    } catch (error) {
+        return res.send(error.message);
+    }
 
-    res.sendStatus(201);
 };
 
 export { getCategories, createCategories };
