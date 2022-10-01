@@ -60,6 +60,17 @@ app.post('/customers', async (req, res) => {
     res.sendStatus(201);
 });
 
+app.put('/customers/:id', async (req, res) => {
+    const { name, phone, cpf, birthday } = req.body;
+    const { id } = req.params;
+
+    await connection.query(
+        `UPDATE customers SET ("name", "phone", "cpf", "birthday") = ('${name}', '${phone}', '${cpf}', '${birthday}') WHERE id = $1;`, [id]
+    );
+
+    res.sendStatus(200);
+});
+
 app.listen(4000, () => {
     console.log("Servidor rodando.")}
 );
