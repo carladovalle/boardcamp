@@ -3,13 +3,17 @@ import { gamesSchema } from "../Schemas/gamesValidation.js";
 
 async function getGames (req, res) {
 
+    const {name} = req.query;
+
     try {
 
         const games = await connection.query(
             `SELECT games.*, 
             categories."name" as "categoryName" 
             FROM games 
-            JOIN categories ON games."categoryId" = categories."id"`
+            JOIN categories ON games."categoryId" = categories."id"
+            WHERE UPPER(games."name") LIKE UPPER($1)
+            `,[name + '%']
         );
 
         res.send(games.rows);

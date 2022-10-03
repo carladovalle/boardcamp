@@ -2,15 +2,51 @@ import connection from "../Database/database.js";
 import { customersSchema } from "../Schemas/customersValidation.js";
 
 async function getCustomers (req, res) {
-    const customers = await connection.query('SELECT * FROM customers;');
-    res.send(customers.rows);
+
+    const {cpf} = req.query;
+
+    if (cpf) {
+
+        try {
+
+            const customers = await connection.query(`SELECT * FROM customers WHERE "cpf" LIKE $1`,[cpf + '%']);
+    
+            return res.send(customers.rows);
+    
+        } catch (error) {
+            return res.send(error.message);
+        }
+
+    }
+
+    try {
+
+        const customers = await connection.query(`SELECT * FROM customers`);
+
+        res.send(customers.rows);
+
+    } catch (error) {
+        return res.send(error.message);
+    }
+
 }; 
 
 async function viewCustomers (req, res) {
+
     const { id } = req.params;
-    const customers = await connection.query('SELECT * FROM customers WHERE id = $1;',
-    [id]);
-    res.send(customers.rows);
+
+    try {
+
+        const customers = await connection.query(
+            'SELECT * FROM customers WHERE id = $1;',
+        [id]);
+
+        res.send(customers.rows);
+
+    } catch (error) {
+        return res.send(error.message);
+    }
+
 }; 
 
 async function createCustomers (req, res) {
