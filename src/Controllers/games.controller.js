@@ -5,20 +5,38 @@ async function getGames (req, res) {
 
     const {name} = req.query;
 
-    try {
+    if (name) {
 
-        const games = await connection.query(
-            `SELECT games.*, 
-            categories."name" as "categoryName" 
-            FROM games 
-            JOIN categories ON games."categoryId" = categories."id"
-            WHERE UPPER(games."name") LIKE UPPER($1)
-            `,[name + '%']
-        );
+        try  {
 
-        res.send(games.rows);
+            const games = await connection.query(
+                `SELECT games.*, 
+                categories."name" as "categoryName" 
+                FROM games 
+                JOIN categories ON games."categoryId" = categories."id"
+                WHERE UPPER(games."name") LIKE UPPER($1)
+                `,[name + '%']
+            );
+    
+            return res.status(200).send(games.rows);
 
-    } catch (error) {
+        }
+        catch (error) {
+            return res.send(error.message);
+        }
+}
+
+    try  {
+
+        const games = await connection.query(`
+        SELECT games.*, categories."name" as "categoryName" 
+        FROM games 
+        JOIN categories ON games."categoryId" = categories."id";
+        `);
+        res.status(200).send(games.rows);
+
+    }
+    catch (error) {
         return res.send(error.message);
     }
 
@@ -46,10 +64,10 @@ async function createGames (req, res) {
             return res.status(409).send("O jogo já existe.")
         }
 
-        const categoryExist = await connection.query('SELECT * FROM categories WHERE name = $1;', [name]);
+        /*const categoryExist = await connection.query('SELECT * FROM categories WHERE name = $1;', [name]);
         if (categoryExist.rows.length !== 1) {
             return res.status(409).send("A categoria não existe.")
-        }
+        }*/
 
         await connection.query(
             'INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);', 

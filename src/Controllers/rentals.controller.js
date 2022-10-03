@@ -9,7 +9,7 @@ async function getRentals (req, res) {
         
         const rentals = await connection.query(
             `SELECT rentals.*,
-            customers.name AS "customersName"
+            customers.name AS "customersName",
             games.*
             FROM rentals
             JOIN customers ON rentals."customerId" = customers."id"
@@ -56,17 +56,17 @@ async function createRentals (req, res) {
 
     try {
 
-        const game = await db.query(`
+        const game = await connection.query(`
         SELECT * FROM games
         WHERE id = $1;
         `,[gameId]);
 
-        const customers = await db.query(`
+        const customers = await connection.query(`
         SELECT * FROM customers
         WHERE id = $1;
         `,[customerId]);
 
-        if (game.rows.length === 0 || customers.rows.length === 0){
+        if (game.rows.length === 0 || customers.rows.length === 0) {
             return res.sendStatus(400);
         }
 
@@ -77,10 +77,10 @@ async function createRentals (req, res) {
         }
 
         await connection.query(
-            `INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, null, $5, null);`, [customerId, gameId, today, daysRented, (parseInt(price) * parseInt(rental.daysRented))]
+            `INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, null, $5, null);`, [customerId, gameId, today, daysRented, (parseInt(price) * parseInt(daysRented))]
         );
 
-        res.sendStatus(201);
+        return res.sendStatus(201);
         
     } catch (error) {
         return res.send(error.message);
@@ -94,7 +94,7 @@ async function deleteRentals (req, res) {
 
     try {
 
-        await db.query(`DELETE FROM rentals WHERE "id" = $1`, [id]);
+        await connection.query(`DELETE FROM rentals WHERE "id" = $1`, [id]);
 
         return res.sendStatus(200);
 
