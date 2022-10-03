@@ -35,16 +35,26 @@ async function viewCustomers (req, res) {
 
     const { id } = req.params;
 
-    try {
+    if (id) {
 
-        const customers = await connection.query(
-            'SELECT * FROM customers WHERE id = $1;',
-        [id]);
+        try {
 
-        res.send(customers.rows);
+            const customers = await connection.query(
+                'SELECT * FROM customers WHERE id = $1;',
+            [id]);
 
-    } catch (error) {
-        return res.send(error.message);
+            if (customers.rows[0].length !== 0) {
+                return res.send(customers.rows[0])
+            }
+    
+            return res.sendStatus(404);
+    
+        } catch (error) {
+            return res.send(error.message);
+        }
+
+    } else {
+        return res.status(404).status('ID nulo');
     }
 
 }; 
@@ -65,6 +75,11 @@ async function createCustomers (req, res) {
     const { name, phone, cpf, birthday } = req.body;
 
     try {
+
+        const hasCPF = await connection.query('SELECT * FROM customers WHERE cpf = $1;', [cpf]);
+        if (hasCPF.rows[0]) {
+            return res.status(409).send("O cpf já está sendo usado.")
+        }
 
         await connection.query(
             'INSERT INTO customers (name, "phone", "cpf", "birthday") VALUES ($1, $2, $3, $4);', 
@@ -97,6 +112,11 @@ async function updateCustomers (req, res) {
     const { id } = req.params;
 
     try {
+
+        const hasCPF = await connection.query('SELECT * FROM customers WHERE cpf = $1;', [cpf]);
+        if (hasCPF.rows[0]) {
+            return res.status(409).send("O cpf já está sendo usado.")
+        }
 
         await connection.query(
             `UPDATE customers SET ("name", "phone", "cpf", "birthday") = ('${name}', '${phone}', '${cpf}', '${birthday}') WHERE id = $1;`, [id]
