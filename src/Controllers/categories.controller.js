@@ -23,8 +23,8 @@ async function createCategories (req, res) {
 
     try {
 
-        const hasCategory = await connection.query('SELECT * FROM categories WHERE name = $1;', [name]);
-        if (hasCategory) {
+        const hasCategory = await connection.query('SELECT * FROM categories WHERE name = ($1);', [name]);
+        if (hasCategory.rows[0]) {
             return res.status(409).send("A categoria já existe.")
         }
 

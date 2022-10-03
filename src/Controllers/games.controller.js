@@ -37,10 +37,15 @@ async function createGames (req, res) {
 
     try {
 
-        /*const hasGame = await connection.query('SELECT * FROM games WHERE name = $1;', [name]);
-        if (hasGame) {
+        const hasGame = await connection.query('SELECT * FROM games WHERE name = $1;', [name]);
+        if (hasGame.rows[0]) {
             return res.status(409).send("O jogo já existe.")
-        }*/
+        }
+
+        const categoryExist = await connection.query('SELECT * FROM categories WHERE name = $1;', [name]);
+        if (categoryExist.rows.length !== 1) {
+            return res.status(409).send("A categoria não existe.")
+        }
 
         await connection.query(
             'INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);', 
