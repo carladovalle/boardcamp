@@ -94,6 +94,12 @@ async function deleteRentals (req, res) {
 
     try {
 
+        const rental = await connection.query(`SELECT * FROM rentals WHERE "id" = $1`,[id]);
+
+        if (rental.rows.length === 0) {
+            return res.sendStatus(404);
+        }
+
         await connection.query(`DELETE FROM rentals WHERE "id" = $1`, [id]);
 
         return res.sendStatus(200);
