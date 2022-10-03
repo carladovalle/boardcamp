@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.post('/rentals', rentalsControllers.createRentals);
 router.get('/rentals', rentalsControllers.getRentals);
+router.delete('/rentals/:id', rentalsControllers.deleteRentals);
 
 export default router;

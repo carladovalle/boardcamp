@@ -14,7 +14,7 @@ async function getRentals (req, res) {
             FROM rentals
             JOIN customers ON rentals."customerId" = customers."id"
             JOIN games ON rentals."gameId" = games."id";`
-            );
+        );
 
         rentals.rows.forEach(el => {
             const obj = {
@@ -68,4 +68,20 @@ async function createRentals (req, res) {
     
 };
 
-export { getRentals, createRentals };
+async function deleteRentals (req, res) {
+
+    const { id } = req.params;
+
+    try {
+
+        await db.query(`DELETE FROM rentals WHERE "id" = $1`, [id]);
+
+        return res.sendStatus(200);
+
+    } catch (error) {
+        return res.send(error.message);
+    }
+
+}
+
+export { getRentals, createRentals, deleteRentals };
